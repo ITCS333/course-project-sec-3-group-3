@@ -1,123 +1,79 @@
-<!--
-  Requirement: Create the Admin View for the Weekly Breakdown
-
-  Instructions:
-  Fill in the HTML elements as described in the comments.
-  This page allows the teacher (admin) to perform full CRUD operations
-  on the weekly course content.
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- TODO: Add the <meta> tag for character encoding (UTF-8). -->
+    <!-- TODO: Add the <meta> tag for character encoding (UTF-8) -->
+    <meta charset="UTF-8">
+    
+    <!-- TODO: Add the responsive viewport meta tag -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- TODO: Add the responsive viewport <meta> tag
-         (width=device-width, initial-scale=1.0). -->
+    <!-- TODO: Add a <title> -->
+    <title>Manage Weekly Breakdown</title>
 
-    <!-- TODO: Add a <title>, e.g., "Manage Weekly Breakdown". -->
+    <!-- TODO: Link to your CSS stylesheet () -->
+    <link rel="stylesheet" href="style.css">
 
-    <!-- TODO: Link to your CSS framework or stylesheet. -->
-
-    <!-- Required: link admin.js with defer. -->
+    <!-- Required: link admin.js with defer -->
     <script src="admin.js" defer></script>
 </head>
 <body>
 
-    <!-- TODO: Create a <header> containing an <h1>
-         "Manage Weekly Breakdown". -->
+    <!-- TODO: Create a <header> -->
+    <header>
+        <h1>Manage Weekly Breakdown</h1>
+    </header>
 
-    <!-- TODO: Create the <main> content area. -->
+    <main>
+        <!-- Section 1: Add / Edit Week Form -->
+        <section id="form-section">
+            <h2>Add a New Week</h2>
+            
+            <form id="week-form" action="#">
+                <fieldset>
+                    <legend>Weekly Details</legend>
 
-        <!-- ============================================================
-             Section 1: Add / Edit Week Form
-             ============================================================ -->
-        <!-- TODO: Create a <section> for the form. -->
+                    <!-- Week Title -->
+                    <label for="week-title">Week Title</label>
+                    <input id="week-title" type="text" required placeholder="Week 1: Introduction to HTML">
 
-            <!-- TODO: Add a sub-heading <h2> "Add a New Week". -->
+                    <!-- Start Date -->
+                    <label for="week-start-date">Start Date</label>
+                    <input id="week-start-date" type="date" required>
 
-            <!-- TODO: Create a <form id="week-form"> (action can be "#").
-                 The id is required by admin.js. -->
+                    <!-- Description -->
+                    <label for="week-description">Description</label>
+                    <textarea id="week-description" rows="5"></textarea>
 
-                <!-- TODO: Use a <fieldset> to group the form controls. -->
-                    <!-- TODO: Add a <legend>, e.g., "Weekly Details". -->
+                    <!-- Resource Links -->
+                    <label for="week-links">Resource Links (one URL per line)</label>
+                    <textarea id="week-links" rows="3"></textarea>
 
-                    <!-- TODO: Add a <label> and <input> for the week title.
-                         - label for="week-title"
-                         - input id="week-title", type="text", required
-                         - Placeholder: "Week 1: Introduction to HTML" -->
+                    <!-- Submit Button -->
+                    <button id="add-week" type="submit">Add Week</button>
+                </fieldset>
+            </form>
+        </section>
 
-                    <!-- TODO: Add a <label> and <input> for the start date.
-                         - label for="week-start-date"
-                         - input id="week-start-date", type="date", required
-                         - Maps to the start_date column in the weeks table. -->
+        <!-- Section 2: Existing Weekly Entries -->
+        <section id="list-section">
+            <h2>Current Weekly Breakdown</h2>
+            
+            <table id="weeks-table">
+                <thead>
+                    <tr>
+                        <th>Week Title</th>
+                        <th>Start Date</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <!-- JS will inject rows here -->
+                <tbody id="weeks-tbody">
+                    <!-- admin.js -->
+                </tbody>
+            </table>
+        </section>
+    </main>
 
-                    <!-- TODO: Add a <label> and <textarea> for the week
-                         description.
-                         - label for="week-description"
-                         - textarea id="week-description", rows="5"
-                         - Maps to the description column in the weeks table. -->
-
-                    <!-- TODO: Add a <label> and <textarea> for resource links
-                         (one URL per line).
-                         - label for="week-links"
-                         - textarea id="week-links", rows="3"
-                         - Maps to the links column (JSON array) in the
-                           weeks table. admin.js will split the textarea
-                           value on newlines and send it as an array. -->
-
-                    <!-- TODO: Add a submit <button>.
-                         - id="add-week", type="submit"
-                         - Text: "Add Week"
-                         - When the form is in edit mode, admin.js will
-                           change the button text to "Update Week" and
-                           store the id being edited in a data attribute. -->
-                <!-- End of <fieldset> -->
-            <!-- End of <form> -->
-        <!-- End of form <section> -->
-
-
-        <!-- ============================================================
-             Section 2: Existing Weekly Entries
-             ============================================================ -->
-        <!-- TODO: Create a <section> to display the current list of weeks. -->
-
-            <!-- TODO: Add a sub-heading <h2> "Current Weekly Breakdown". -->
-
-            <!-- TODO: Create a <table id="weeks-table">. -->
-
-                <!-- TODO: Create a <thead> with a <tr> containing <th>
-                     elements:
-                     - "Week Title"
-                     - "Start Date"
-                     - "Description"
-                     - "Actions"
-                     The columns must match the data rendered by
-                     admin.js createWeekRow(). -->
-
-                <!-- TODO: Create a <tbody id="weeks-tbody">.
-                     The id is required by admin.js so it can inject
-                     <tr> rows. admin.js will clear and repopulate this
-                     tbody whenever the data changes. -->
-
-                <!-- admin.js will inject rows here. Each row follows
-                     this structure (do NOT hardcode real data):
-
-                <tr>
-                    <td>Week 1: Introduction to HTML</td>
-                    <td>2025-01-13</td>
-                    <td>Learn HTML fundamentals...</td>
-                    <td>
-                        <button class="edit-btn"   data-id="1">Edit</button>
-                        <button class="delete-btn" data-id="1">Delete</button>
-                    </td>
-                </tr>
-
-                The data-id attribute holds the integer id from the
-                weeks table (primary key). -->
-
-            <!-- End of <table> -->
-        <!-- End of list <section> -->
-
-    <!-- End of <main> -->
 </body>
 </html>
