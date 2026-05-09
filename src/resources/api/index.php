@@ -62,7 +62,6 @@
 // HEADERS AND INITIALIZATION
 // ============================================================================
 
-<?php
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -481,4 +480,4 @@ function validateRequiredFields($data, $requiredFields) {
 }
 
 ?>
-?>
+
