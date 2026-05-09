@@ -54,11 +54,11 @@ function createResourceRow(resource) {
   return tr;
 }
 
-function renderTable() {
+function renderTable(resourcesToRender = resources) {
   resourcesTbody.textContent = "";
 
-  for (let i = 0; i < resources.length; i++) {
-    const row = createResourceRow(resources[i]);
+  for (let i = 0; i < resourcesToRender.length; i++) {
+    const row = createResourceRow(resourcesToRender[i]);
     resourcesTbody.appendChild(row);
   }
 }
