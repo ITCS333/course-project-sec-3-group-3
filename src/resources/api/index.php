@@ -1,67 +1,4 @@
 <?php
-/**
- * Course Resources API
- * 
- * This is a RESTful API that handles all CRUD operations for course resources 
- * and their associated comments/discussions.
- * It uses PDO to interact with a MySQL database.
- * 
- * Database Table Structures (for reference):
- * 
- * Table: resources
- * Columns:
- *   - id (INT UNSIGNED, PRIMARY KEY, AUTO_INCREMENT)
- *   - title (VARCHAR(255), NOT NULL)
- *   - description (TEXT, nullable)
- *   - link (VARCHAR(500), NOT NULL)
- *   - created_at (TIMESTAMP)
- * 
- * Table: comments_resource
- * Columns:
- *   - id (INT UNSIGNED, PRIMARY KEY, AUTO_INCREMENT)
- *   - resource_id (INT UNSIGNED, FOREIGN KEY references resources.id, CASCADE DELETE)
- *   - author (VARCHAR(100), NOT NULL)
- *   - text (TEXT, NOT NULL)
- *   - created_at (TIMESTAMP)
- * 
- * HTTP Methods Supported:
- *   - GET:    Retrieve resource(s) or comment(s)
- *   - POST:   Create a new resource or comment
- *   - PUT:    Update an existing resource
- *   - DELETE: Delete a resource (associated comments in comments_resource are
- *             removed automatically by the ON DELETE CASCADE constraint)
- * 
- * Response Format: JSON
- * All responses follow the structure:
- *   { "success": true,  "data": ...    }  (on success)
- *   { "success": false, "message": ... }  (on error)
- * 
- * API Endpoints:
- * 
- *   Resources:
- *     GET    /resources/api/index.php                         - Get all resources
- *     GET    /resources/api/index.php?id={id}                 - Get single resource by ID
- *     POST   /resources/api/index.php                         - Create new resource
- *     PUT    /resources/api/index.php                         - Update resource
- *     DELETE /resources/api/index.php?id={id}                 - Delete resource
- * 
- *   Comments:
- *     GET    /resources/api/index.php?resource_id={id}&action=comments
- *                                                             - Get all comments for a resource
- *     POST   /resources/api/index.php?action=comment          - Create a new comment
- *     DELETE /resources/api/index.php?comment_id={id}&action=delete_comment
- *                                                             - Delete a single comment
- * 
- * Query Parameters for GET all resources:
- *   - search: Optional. Filter resources by title or description using LIKE.
- *   - sort:   Optional. Sort field — allowed values: title, created_at (default: created_at).
- *   - order:  Optional. Sort direction — allowed values: asc, desc (default: desc).
- */
-
-// ============================================================================
-// HEADERS AND INITIALIZATION
-// ============================================================================
-
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -73,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once './config/Database.php';
+require_once __DIR__ . '/config/Database.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -155,7 +92,7 @@ function createResource($db, $data) {
     if (!$validation['valid']) {
         sendResponse([
             'success' => false,
-            'message' => 'Missing required fields.'
+            'message' => 'Missing required fields: ' . implode(', ', $validation['missing']) . '.'
         ], 400);
     }
 
@@ -321,14 +258,14 @@ function createComment($db, $data) {
     if (!$validation['valid']) {
         sendResponse([
             'success' => false,
-            'message' => 'Missing required fields.'
+            'message' => 'Missing required fields: ' . implode(', ', $validation['missing']) . '.'
         ], 400);
     }
 
     if (!is_numeric($data['resource_id'])) {
         sendResponse([
             'success' => false,
-            'message' => 'resource_id must be numeric.'
+            'message' => 'resource_id must be a numeric value.'
         ], 400);
     }
 
@@ -434,14 +371,14 @@ try {
 
     sendResponse([
         'success' => false,
-        'message' => 'A database error occurred.'
+        'message' => 'A database error occurred. Please try again later.'
     ], 500);
 } catch (Exception $e) {
     error_log($e->getMessage());
 
     sendResponse([
         'success' => false,
-        'message' => 'An unexpected error occurred.'
+        'message' => 'An unexpected error occurred. Please try again later.'
     ], 500);
 }
 
@@ -478,6 +415,3 @@ function validateRequiredFields($data, $requiredFields) {
         'missing' => $missing
     ];
 }
-
-?>
-
