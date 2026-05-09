@@ -11,38 +11,40 @@
   3. Implement the TODOs below.
 */
 
-// --- Element Selections ---
-// TODO: Select the section for the resource list ('#resource-list-section').
+const resourceListSection = document.querySelector("#resource-list-section");
 
-// --- Functions ---
-
-/**
- * TODO: Implement the createResourceArticle function.
- * It takes one resource object { id, title, description, link }.
- * It should return an <article> element matching the structure in `list.html`.
- * The "View Resource & Discussion" link's `href` MUST be set to
- * `details.html?id=${id}` so the detail page knows which resource to load.
- */
 function createResourceArticle(resource) {
-  // ... your implementation here ...
+  const article = document.createElement("article");
+
+  const title = document.createElement("h2");
+  title.textContent = resource.title;
+
+  const description = document.createElement("p");
+  description.textContent = resource.description;
+
+  const link = document.createElement("a");
+  link.href = "details.html?id=" + resource.id;
+  link.textContent = "View Resource & Discussion";
+
+  article.appendChild(title);
+  article.appendChild(description);
+  article.appendChild(link);
+
+  return article;
 }
 
-/**
- * TODO: Implement the loadResources function.
- * This function must be 'async'.
- * It should:
- * 1. Use `fetch()` to GET data from the API endpoint:
- *    './api/index.php'
- * 2. Parse the JSON response. The API returns { success: true, data: [...] }.
- * 3. Clear any existing content from the list section.
- * 4. Loop through the resources array in `data`. For each resource:
- *    - Call `createResourceArticle()` with the resource object.
- *    - Append the returned <article> element to the list section.
- */
 async function loadResources() {
-  // ... your implementation here ...
+  const response = await fetch("./api/index.php");
+  const result = await response.json();
+
+  resourceListSection.textContent = "";
+
+  if (result.success) {
+    for (let i = 0; i < result.data.length; i++) {
+      const article = createResourceArticle(result.data[i]);
+      resourceListSection.appendChild(article);
+    }
+  }
 }
 
-// --- Initial Page Load ---
-// Call the function to populate the page.
 loadResources();
