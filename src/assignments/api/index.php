@@ -127,7 +127,7 @@ function getAllAssignments(PDO $db): void
     // TODO: Build the base SELECT query.
     // SELECT id, title, description, due_date, files, created_at, updated_at
     // FROM assignments
-    $sql="SELECT id, title, description, due_date, files, created_at, updated_at FROM assignments"
+    $sql="SELECT id, title, description, due_date, files, created_at, updated_at FROM assignments";
     // TODO: If $_GET['search'] is provided and non-empty, append:
     // WHERE title LIKE :search OR description LIKE :search
     // Bind '%' . $search . '%' to :search.
