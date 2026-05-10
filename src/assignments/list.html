@@ -10,11 +10,12 @@
 <head>
     <!-- TODO: Add <meta> tags for charset (UTF-8) and viewport
          (width=device-width, initial-scale=1.0). -->
-
+    <meta charset="UTF-8">
+    <meta name="viewport"content="width=device-width,initial-scale=1.0">
     <!-- TODO: Add a <title>, e.g., "Course Assignments". -->
-
+        <title>Course Assignments</title>
     <!-- TODO: Link to your CSS framework or stylesheet. -->
-
+        <link rel="stylesheet"href="styles.css">
     <!-- Required: link list.js with defer so the DOM is ready before the
          script runs. -->
     <script src="list.js" defer></script>
@@ -22,12 +23,15 @@
 <body>
 
     <!-- TODO: Create a <header> containing an <h1> "Course Assignments". -->
-
+        <header>
+            <h1>Course Assignments</h1>
+        </header>
     <!-- TODO: Create the <main> content area. -->
-
+        <main>
         <!-- TODO: Create a <section id="assignment-list-section"> to contain
              the list of assignment articles.
              The id is required by list.js. -->
+            <section id="assignment-list-section">
 
             <!-- list.js will inject one <article> per assignment here.
                  Each article follows the structure below. -->
@@ -46,7 +50,8 @@
             details.js can read the id from the URL query string. -->
 
         <!-- End of #assignment-list-section -->
+            </section>
     <!-- End of <main> -->
-
+        </main>
 </body>
 </html>

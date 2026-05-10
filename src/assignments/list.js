@@ -25,7 +25,7 @@
 // --- Element Selections ---
 // TODO: Select the section for the assignment list using its
 //       id 'assignment-list-section'.
-
+const assignmentListSection=document.getElementById('assignment-list-section');
 // --- Functions ---
 
 /**
@@ -55,6 +55,21 @@
  */
 function createAssignmentArticle(assignment) {
   // ... your implementation here ...
+  const article=document.createElement('article');
+  const h2=document.createElement('h2');
+  h2.textContent=assignment.title;
+  const p1=document.createElement('p');
+  p1.textContent='Due: '+assignment.due_date;
+  const p2=document.createElement('p');
+  p2.textContent=assignment.description;
+  const a=document.createElement('a');
+  a.href='details.html?id='+assignment.id;
+  a.innerHTML='View Details & Discussion';
+  article.appendChild(h2);
+  article.appendChild(p1);
+  article.appendChild(p2);
+  article.appendChild(a);
+  return article;
 }
 
 /**
@@ -72,6 +87,12 @@ function createAssignmentArticle(assignment) {
  */
 async function loadAssignments() {
   // ... your implementation here ...
+  const res=await fetch('./api/index.php');
+  const result=await res.json();
+  assignmentListSection.innerHTML="";
+  result.data.forEach(a=>{
+    assignmentListSection.appendChild(createAssignmentArticle(a));
+  });
 }
 
 // --- Initial Page Load ---

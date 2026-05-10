@@ -10,11 +10,12 @@
 <head>
     <!-- TODO: Add <meta> tags for charset (UTF-8) and viewport
          (width=device-width, initial-scale=1.0). -->
-
+     <meta charset="UTF-8">
+     <meta name="viewport"content="width=device-width,initial-scale=1.0">
     <!-- TODO: Add a <title>, e.g., "Assignment Details". -->
-
+     <title>Assignment Details</title>
     <!-- TODO: Link to your CSS framework or stylesheet. -->
-
+     <link rel="stylesheet" href="styles.css">
     <!-- Required: link details.js with defer. -->
     <script src="details.js" defer></script>
 </head>
@@ -24,44 +25,46 @@
          Inside it, add an <h1 id="assignment-title">.
          details.js will set its textContent to the assignment's title.
          Leave it empty for now. -->
-
+          <header>
+               <h1 id="assignment-title"></h1>
+          </header>
     <!-- TODO: Create the <main> content area. -->
-
+     <main>
         <!-- ============================================================
              Section 1: Assignment Information
              ============================================================ -->
         <!-- TODO: Use an <article> to display the main assignment
              information. -->
-
+          <article>
             <!-- TODO: Add a <p id="assignment-due-date">.
                  details.js will set it to "Due: YYYY-MM-DD"
                  using the due_date column from the assignments table. -->
-
+               <p id="assignment-due-date"></p>
             <!-- TODO: Add a <h2> "Description". -->
-
+               <h2>Description</h2>
             <!-- TODO: Add a <p id="assignment-description">.
                  details.js will set its textContent to the assignment's
                  description from the assignments table. -->
-
+               <p id="assignment-description"></p>
             <!-- TODO: Add a <h2> "Attached Files &amp; Links". -->
-
+               <h2>Attached Files & Links</h2>
             <!-- TODO: Add a <ul id="assignment-files-list">.
                  details.js will populate this list from the files column
                  in the assignments table. That column is a JSON-encoded
                  array of URL strings. Each URL becomes a
                  <li><a href="{url}">{url}</a></li> item.
                  Leave the list empty here. -->
-
+               <ul id="assignment-files-list"></ul>
         <!-- End of <article> -->
-
+          </article>
 
         <!-- ============================================================
              Section 2: Discussion Forum
              ============================================================ -->
         <!-- TODO: Create a <section id="discussion-forum">. -->
-
+          <section id="discussion-forum">
             <!-- TODO: Add a <h2> "Questions &amp; Discussion". -->
-
+               <h2>Questions & Discussion</h2>
             <!-- Subsection 2.1: Existing Comments -->
             <!-- TODO: Add a <div id="comment-list">.
                  details.js will inject one <article> per comment here.
@@ -75,28 +78,33 @@
                  Comments come from the comments_assignment table
                  (columns: id, assignment_id, author, text, created_at).
                  Leave the div empty here. -->
-
+                 <div id="comment-list"></div>
             <!-- Subsection 2.2: Add a Comment Form -->
             <!-- TODO: Create a <form id="comment-form"> (action="#").
                  The id is required by details.js. -->
-
+               <form id="comment-form"action="#">
                 <!-- TODO: Use a <fieldset> to group the controls. -->
+                    <fieldset>
                     <!-- TODO: Add a <legend>, e.g., "Ask a Question". -->
-
+                         <legend>Ask a Question</legend>
                     <!-- TODO: Add a <label> and <textarea> for the comment.
                          - label for="new-comment"
                          - textarea id="new-comment", required
                          - The id must be exactly "new-comment" as
                            details.js reads this element by that id. -->
-
+                         <label for="new-comment">Comment</label>
+                         <textarea id="new-comment"required></textarea>
                     <!-- TODO: Add a submit <button>.
                          - type="submit"
                          - Text: "Post Comment" -->
+                         <button type="submit">Post Comment</button>
                 <!-- End of <fieldset> -->
+                    </fieldset>
             <!-- End of <form> -->
-
+               </form>
         <!-- End of <section#discussion-forum> -->
-
+          </section>
     <!-- End of <main> -->
+     </main>
 </body>
 </html>
