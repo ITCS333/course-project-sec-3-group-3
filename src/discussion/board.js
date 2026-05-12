@@ -30,8 +30,10 @@ let topics = [];
 
 // --- Element Selections ---
 // TODO: Select the new-topic form by id 'new-topic-form'.
+const newTopicForm = document.getElementById("new-topic-form");
 
 // TODO: Select the topic list container by id 'topic-list-container'.
+const topicListContainer = document.getElementById("topic-list-container");
 
 // --- Functions ---
 
@@ -62,6 +64,36 @@ let topics = [];
  */
 function createTopicArticle(topic) {
   // ... your implementation here ...
+  const article = document.createElement("article");
+
+  const heading = document.createElement("h3");
+  const link = document.createElement("a");
+  link.href = `topic.html?id=${topic.id}`;
+  link.textContent = topic.subject;
+  heading.appendChild(link);
+
+  const footer = document.createElement("footer");
+  footer.textContent = `Posted by: ${topic.author} on ${topic.created_at}`;
+
+  const actions = document.createElement("div");
+  const editBtn = document.createElement("button");
+  editBtn.className = "edit-btn";
+  editBtn.dataset.id = String(topic.id);
+  editBtn.textContent = "Edit";
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "delete-btn";
+  deleteBtn.dataset.id = String(topic.id);
+  deleteBtn.textContent = "Delete";
+
+  actions.appendChild(editBtn);
+  actions.appendChild(deleteBtn);
+
+  article.appendChild(heading);
+  article.appendChild(footer);
+  article.appendChild(actions);
+
+  return article;
 }
 
 /**
@@ -75,6 +107,11 @@ function createTopicArticle(topic) {
  */
 function renderTopics() {
   // ... your implementation here ...
+  if (!topicListContainer) return;
+  topicListContainer.innerHTML = "";
+  topics.forEach((topic) => {
+    topicListContainer.appendChild(createTopicArticle(topic));
+  });
 }
 
 /**
@@ -98,6 +135,44 @@ function renderTopics() {
  */
 async function handleCreateTopic(event) {
   // ... your implementation here ...
+  event.preventDefault();
+
+  const subjectInput = document.getElementById("topic-subject");
+  const messageInput = document.getElementById("topic-message");
+  const submitBtn = document.getElementById("create-topic");
+
+  const subject = subjectInput ? subjectInput.value.trim() : "";
+  const message = messageInput ? messageInput.value.trim() : "";
+  const editId = submitBtn ? submitBtn.dataset.editId : undefined;
+
+  if (editId) {
+    await handleUpdateTopic(editId, { subject, message });
+    if (newTopicForm) newTopicForm.reset();
+    if (submitBtn) {
+      submitBtn.textContent = "Create Topic";
+      delete submitBtn.dataset.editId;
+    }
+    return;
+  }
+
+  const response = await fetch("./api/index.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ subject, message, author: "Student" })
+  });
+  const result = await response.json();
+
+  if (result.success) {
+    topics.push({
+      id: result.id,
+      subject,
+      message,
+      author: "Student",
+      created_at: result.created_at || ""
+    });
+    renderTopics();
+    if (newTopicForm) newTopicForm.reset();
+  }
 }
 
 /**
@@ -116,6 +191,20 @@ async function handleCreateTopic(event) {
  */
 async function handleUpdateTopic(id, fields) {
   // ... your implementation here ...
+  const response = await fetch("./api/index.php", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, ...fields })
+  });
+  const result = await response.json();
+
+  if (result.success) {
+    const index = topics.findIndex((topic) => String(topic.id) === String(id));
+    if (index !== -1) {
+      topics[index] = { ...topics[index], ...fields };
+    }
+    renderTopics();
+  }
 }
 
 /**
@@ -138,6 +227,36 @@ async function handleUpdateTopic(id, fields) {
  */
 async function handleTopicListClick(event) {
   // ... your implementation here ...
+  const target = event.target;
+  if (!target) return;
+
+  if (target.classList.contains("delete-btn")) {
+    const id = target.dataset.id;
+    const response = await fetch(`./api/index.php?id=${id}`, { method: "DELETE" });
+    const result = await response.json();
+    if (result.success) {
+      topics = topics.filter((topic) => String(topic.id) !== String(id));
+      renderTopics();
+    }
+    return;
+  }
+
+  if (target.classList.contains("edit-btn")) {
+    const id = target.dataset.id;
+    const topic = topics.find((item) => String(item.id) === String(id));
+    if (!topic) return;
+
+    const subjectInput = document.getElementById("topic-subject");
+    const messageInput = document.getElementById("topic-message");
+    const submitBtn = document.getElementById("create-topic");
+
+    if (subjectInput) subjectInput.value = topic.subject;
+    if (messageInput) messageInput.value = topic.message;
+    if (submitBtn) {
+      submitBtn.textContent = "Update Topic";
+      submitBtn.dataset.editId = String(id);
+    }
+  }
 }
 
 /**
@@ -155,6 +274,20 @@ async function handleTopicListClick(event) {
  */
 async function loadAndInitialize() {
   // ... your implementation here ...
+  const response = await fetch("./api/index.php");
+  const result = await response.json();
+
+  if (result.success) {
+    topics = result.data;
+    renderTopics();
+  }
+
+  if (newTopicForm) {
+    newTopicForm.addEventListener("submit", handleCreateTopic);
+  }
+  if (topicListContainer) {
+    topicListContainer.addEventListener("click", handleTopicListClick);
+  }
 }
 
 // --- Initial Page Load ---
