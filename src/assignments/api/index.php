@@ -133,7 +133,7 @@ function getAllAssignments(PDO $db): void
     // Bind '%' . $search . '%' to :search.
     if(!empty($_GET['search'])){
         $search=$_GET['search'];
-        $sql.="WHERE title LIKE :search OR description LIKE :search";
+        $sql.=" WHERE title LIKE :search OR description LIKE :search";
     }
     $stmt->bindValue(':search', '%'.$search.'%');
     // TODO: Validate $_GET['sort'] against the whitelist
@@ -151,7 +151,7 @@ function getAllAssignments(PDO $db): void
         $order='asc';
     }
     // TODO: Append ORDER BY {sort} {order} to the query.
-    $sql.="ORDER BY $sort $order";
+    $sql.=" ORDER BY $sort $order";
     // TODO: Prepare, bind (if searching), and execute the statement.
     $stmt=$db->prepare($sql);
     if(!empty($search)){

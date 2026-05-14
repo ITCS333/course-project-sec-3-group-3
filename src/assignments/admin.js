@@ -145,7 +145,7 @@ async function handleAddAssignment(event) {
   if(result.success){
     assignments.push({id:result.id,title,due_date,description,files});
     renderTable();
-    event.target.reset();
+    document.querySelector('form').reset();
   }
 }
 
