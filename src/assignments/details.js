@@ -92,7 +92,8 @@ function renderAssignmentDetails(assignment) {
   assignmentDueDate.textContent="Due: "+assignment.due_date;
   assignmentDescription.textContent=assignment.description;
   assignmentFilesList.innerHTML="";
-  assignment.files.forEach(url=>{
+  if(assignment.files){
+    assignment.files.forEach(url=>{
     const li=document.createElement('li');
     const a=document.createElement('a');
     a.href=url;
@@ -100,6 +101,7 @@ function renderAssignmentDetails(assignment) {
     li.appendChild(a);
     assignmentFilesList.appendChild(li);
   });
+}
 }
 
 /**
