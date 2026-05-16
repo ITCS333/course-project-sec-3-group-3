@@ -288,6 +288,7 @@ function updateAssignment(PDO $db, array $data): void
     // If not, sendResponse HTTP 400.
     if(empty($data['id'])){
         sendResponse(['success'=>false,'message'=>'Missing id'],400);
+        return;
     }
     // TODO: Check that an assignment with this id exists.
     // If not, sendResponse HTTP 404.
@@ -295,6 +296,7 @@ function updateAssignment(PDO $db, array $data): void
     $stmt->execute([$data['id']]);
     if(!$stmt->fetch(PDO::FETCH_ASSOC)){
         sendResponse(['success'=>false,'message'=>'Assignment not found'],404);
+        return;
     }
     // TODO: Dynamically build the SET clause for whichever of
     // title, description, due_date, files are present in $data.
@@ -315,6 +317,7 @@ function updateAssignment(PDO $db, array $data): void
         $date=DateTime::createFromFormat('Y-m-d',$due_date);
         if(!$date||$date->format('Y-m-d')!==$due_date){
             sendResponse(['success'=>false,'message'=>'Invalid due date format'],400);
+            return;
         }
         $fields[]="due_date=?";
         $params[]=$due_date;
@@ -327,6 +330,7 @@ function updateAssignment(PDO $db, array $data): void
     // TODO: If no updatable fields are present, sendResponse HTTP 400.
     if(empty($fields)){
         sendResponse(['success'=>false,'message'=>'No fields to update'],400);
+        return;
     }
     // TODO: updated_at is refreshed automatically by MySQL
     //       (ON UPDATE CURRENT_TIMESTAMP) — no need to set it manually.
@@ -336,9 +340,9 @@ function updateAssignment(PDO $db, array $data): void
     $sql="UPDATE assignments SET ".implode(',',$fields)." WHERE id=?";
     $stmt=$db->prepare($sql);
     $params[]=$data['id'];
-    $stmt->execute($params);
+    $result=$stmt->execute($params);
     // TODO: sendResponse HTTP 200 on success, HTTP 500 on failure.
-    if($stmt->rowCount()>=0){
+    if($result){
         sendResponse(['success'=>true],200);
     }
     else{
