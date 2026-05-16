@@ -131,11 +131,12 @@ function getAllAssignments(PDO $db): void
     // TODO: If $_GET['search'] is provided and non-empty, append:
     // WHERE title LIKE :search OR description LIKE :search
     // Bind '%' . $search . '%' to :search.
+    $search=null;
     if(!empty($_GET['search'])){
         $search=$_GET['search'];
         $sql.=" WHERE title LIKE :search OR description LIKE :search";
     }
-    $stmt->bindValue(':search', '%'.$search.'%');
+
     // TODO: Validate $_GET['sort'] against the whitelist
     // [title, due_date, created_at].
     // Default to 'due_date' if missing or invalid.
@@ -147,14 +148,14 @@ function getAllAssignments(PDO $db): void
     // TODO: Validate $_GET['order'] against [asc, desc].
     // Default to 'asc' if missing or invalid.
     $order=strtolower($_GET['order']??'asc');
-    if(!in_array($order, ['asc'], ['desc'])){
+    if(!in_array($order, ['asc', 'desc'])){
         $order='asc';
     }
     // TODO: Append ORDER BY {sort} {order} to the query.
     $sql.=" ORDER BY $sort $order";
     // TODO: Prepare, bind (if searching), and execute the statement.
     $stmt=$db->prepare($sql);
-    if(!empty($search)){
+    if($search!==null){
         $stmt->bindValue(':search', '%'.$search.'%');
     }
     $stmt->execute();
@@ -165,6 +166,7 @@ function getAllAssignments(PDO $db): void
     foreach($assignments as &$row){
         $row['files']=json_decode($row['files'],true)??[];
     }
+    unset($row);
     // TODO: Call sendResponse(['success' => true, 'data' => $assignments]);
     sendResponse(['success'=>true,'data'=>$assignments]);
 }
