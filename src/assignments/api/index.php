@@ -187,21 +187,28 @@ function getAssignmentById(PDO $db, $id): void
     // If not, call sendResponse with HTTP 400.
     if(!$id||!is_numeric($id)){
         sendResponse(['success'=>false,'message'=>'Invalid assignment ID'],400);
+        return;
     }
     // TODO: SELECT id, title, description, due_date, files,
     //       created_at, updated_at FROM assignments WHERE id = ?
     $sql="SELECT id,title,description,due_date,files,created_at,updated_at FROM assignments WHERE id = ?";
     // TODO: Fetch one row. Decode the files JSON:
     // $assignment['files'] = json_decode($assignment['files'], true) ?? [];
+    $stmt=$db->prepare($sql);
+    $stmt->execute([$id]);
     $assignment=$stmt->fetch(PDO::FETCH_ASSOC);
-    $assignment['files']=json_decode($assignment['files'],true)??[];
+    if($assignment){
+        $assignment['files']=json_decode($assignment['files'],true)??[];
+    }
     // TODO: If found, sendResponse success with the assignment.
     // If not found, sendResponse error with HTTP 404.
     if($assignment){
         sendResponse(['success'=>true,'data'=>$assignment]);
+        return;
     }
     else{
         sendResponse(['success'=>false,'message'=>'Assignment not found'],404);
+        return;
     }
 }
 
