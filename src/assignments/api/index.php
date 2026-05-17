@@ -286,7 +286,7 @@ function updateAssignment(PDO $db, array $data): void
 {
     // TODO: Validate that $data['id'] is present.
     // If not, sendResponse HTTP 400.
-    if(empty($data['id'])){
+    if(!isset($data['id'])){
         sendResponse(['success'=>false,'message'=>'Missing id'],400);
         return;
     }
