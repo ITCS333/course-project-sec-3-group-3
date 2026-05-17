@@ -286,7 +286,7 @@ function updateAssignment(PDO $db, array $data): void
 {
     // TODO: Validate that $data['id'] is present.
     // If not, sendResponse HTTP 400.
-    if(!array_key_exists('id', $data)){
+    if (!isset($data['id'])){
         sendResponse(['success'=>false,'message'=>'Missing id'],400);
         return;
     }
@@ -323,7 +323,7 @@ function updateAssignment(PDO $db, array $data): void
         $params[]=$due_date;
     }
     if(isset($data['files'])){
-        $files=is_array($data['files'])?json_encode($data['files']):json_encode([]);
+        $files = json_encode($data['files']);
         $fields[]="files=?";
         $params[]=$files;
     }
