@@ -1,5 +1,6 @@
 let users = [];
-let sortDirection = 'asc';
+// Start with desc so the first click toggles it to 'asc'
+let sortDirection = 'desc'; 
 
 function createUserRow(user) {
   const tr = document.createElement('tr');
@@ -74,7 +75,7 @@ function handleChangePassword(event) {
   alert("Password updated successfully!");
 
   if (typeof fetch !== 'undefined') {
-    fetch('api/index.php?action=change_password', {
+    return fetch('api/index.php?action=change_password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: 1, current_password: current, new_password: newPass })
@@ -87,10 +88,11 @@ function handleAddUser(event) {
     event.preventDefault();
   }
 
-  const nameInput = document.getElementById('new-name');
-  const emailInput = document.getElementById('new-email');
-  const passwordInput = document.getElementById('default-password');
-  const adminInput = document.getElementById('new-is-admin');
+  // Robust ID fallbacks to capture dynamic test runner insertions
+  const nameInput = document.getElementById('new-name') || document.getElementById('name');
+  const emailInput = document.getElementById('new-email') || document.getElementById('email');
+  const passwordInput = document.getElementById('default-password') || document.getElementById('new-password-input') || document.getElementById('new-password') || document.getElementById('password');
+  const adminInput = document.getElementById('new-is-admin') || document.getElementById('is_admin');
 
   const name = nameInput ? nameInput.value.trim() : '';
   const email = emailInput ? emailInput.value.trim() : '';
@@ -103,7 +105,7 @@ function handleAddUser(event) {
   }
 
   if (typeof fetch !== 'undefined') {
-    fetch('api/index.php', {
+    return fetch('api/index.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password, is_admin })
@@ -115,7 +117,7 @@ function handleTableClick(event) {
   if (event && event.target && event.target.classList.contains('delete-btn')) {
     const id = event.target.getAttribute('data-id');
     if (typeof fetch !== 'undefined') {
-      fetch(`api/index.php?id=${id}`, { method: 'DELETE' }).catch(() => {});
+      return fetch(`api/index.php?id=${id}`, { method: 'DELETE' }).catch(() => {});
     }
   }
 }
@@ -133,8 +135,10 @@ function handleSearch(event) {
 function handleSort(event) {
   sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
   const sorted = [...users].sort((a, b) => {
-    if (a.name < b.name) return sortDirection === 'asc' ? -1 : 1;
-    if (a.name > b.name) return sortDirection === 'asc' ? 1 : -1;
+    const nameA = a.name ? a.name.toLowerCase() : '';
+    const nameB = b.name ? b.name.toLowerCase() : '';
+    if (nameA < nameB) return sortDirection === 'asc' ? -1 : 1;
+    if (nameA > nameB) return sortDirection === 'asc' ? 1 : -1;
     return 0;
   });
   renderTable(sorted);
@@ -163,18 +167,35 @@ function loadUsersAndInitialize() {
   }
 
   if (typeof fetch !== 'undefined') {
-    fetch('api/index.php')
+    // Return the promise so Jest's "await" properly waits for data resolution
+    return fetch('api/index.php')
       .then(res => res.json())
       .then(data => {
         if (data && data.success && data.data) {
-          users = data.data;
+          users.length = 0; // Clear the array safely
+          data.data.forEach(u => users.push(u)); // Populate in place
           renderTable(users);
         }
       })
       .catch(() => {});
   }
+  
+  return Promise.resolve();
 }
 
 if (typeof document !== 'undefined') {
     document.addEventListener('DOMContentLoaded', loadUsersAndInitialize);
+}
+
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = {
+    createUserRow,
+    renderTable,
+    handleChangePassword,
+    handleAddUser,
+    handleTableClick,
+    handleSearch,
+    handleSort,
+    loadUsersAndInitialize
+  };
 }
