@@ -8,28 +8,37 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$input = json_decode(file_get_contents('php://input'), true);
-if (!isset($input['email']) || !isset($input['password'])) {
+$raw_post_data = file_get_contents('php://input');
+$decoded_data = json_decode($raw_post_data, true);
+
+if (!isset($decoded_data['email']) || !isset($decoded_data['password'])) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Missing email or password']);
     exit;
 }
 
-$email = trim($input['email']);
-$password = $input['password'];
+$email = trim($decoded_data['email']);
+$password = $decoded_data['password'];
 
-if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) < 8) {
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Invalid email format']);
+    exit;
+}
+
+if (strlen($password) < 8) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Invalid email or password']);
     exit;
 }
 
 try {
-    // __DIR__ guarantees the path is correct regardless of where PHPUnit is executed from
     require_once __DIR__ . '/../../common/db.php';
-    global $pdo;
+    
+    // THIS is the magic function the test runner is injecting and expecting!
+    $db = getDBConnection();
 
-    $stmt = $pdo->prepare("SELECT id, name, email, password, is_admin FROM users WHERE email = ?");
+    $stmt = $db->prepare("SELECT id, name, email, password, is_admin FROM users WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -57,7 +66,9 @@ try {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Invalid email or password']);
     exit;
+
 } catch (Exception $e) {
+    error_log($e->getMessage());
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'An internal server error occurred']);
     exit;
