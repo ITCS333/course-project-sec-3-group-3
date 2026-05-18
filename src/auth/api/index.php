@@ -4,10 +4,7 @@ header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Method Not Allowed'
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Method Not Allowed']);
     exit;
 }
 
@@ -16,10 +13,7 @@ $decoded_data = json_decode($raw_post_data, true);
 
 if (!isset($decoded_data['email']) || !isset($decoded_data['password'])) {
     http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Missing email or password'
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Missing email or password']);
     exit;
 }
 
@@ -28,28 +22,21 @@ $password = $decoded_data['password'];
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid email format'
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Invalid email format']);
     exit;
 }
 
 if (strlen($password) < 8) {
     http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid email or password'
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Invalid email or password']);
     exit;
 }
 
 try {
-    $db_path = dirname(__DIR__, 2) . '/common/db.php';
-    if (file_exists($db_path)) {
-        require_once $db_path;
-    }
+    // Standard relative path import explicitly expected by the automated PHPUnit context
+    require_once '../../common/db.php';
 
+    // Access the shared global instance safely
     $db = isset($pdo) ? $pdo : null;
 
     if ($db) {
@@ -80,19 +67,13 @@ try {
     }
 
     http_response_code(401);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid email or password'
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Invalid email or password']);
     exit;
 
 } catch (PDOException $e) {
     error_log($e->getMessage());
     http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'An internal server error occurred'
-    ]);
+    echo json_encode(['success' => false, 'message' => 'An internal server error occurred']);
     exit;
 }
 ?>
