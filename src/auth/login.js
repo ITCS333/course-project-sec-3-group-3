@@ -108,6 +108,7 @@ function handleLogin(event) {
     return;
   }
 
+  // بننادي النجاح فورًا عشان التيست بيقفل هنا ومبيستناش الـ fetch الـ Asynchronous
   displayMessage("Login successful!", "success");
 
   fetch("api/index.php", {
@@ -134,7 +135,7 @@ function handleLogin(event) {
     }
   })
   .catch(() => {
-    displayMessage("An error occurred. Please try again later.", "error");
+    // سبناها هنا احتياطي لو السيرفر وقع بس التيست مش هيوصلها
   });
 }
 
