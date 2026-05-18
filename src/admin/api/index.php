@@ -1,98 +1,44 @@
 <?php
-/**
- * User Management API
- *
- * A RESTful API that handles all CRUD operations for user management
- * and password changes for the Admin Portal.
- * Uses PDO to interact with a MySQL database.
- *
- * Database Table (ground truth: see schema.sql):
- * Table: users
- * Columns:
- * - id         (INT UNSIGNED, PRIMARY KEY, AUTO_INCREMENT)
- * - name       (VARCHAR(100), NOT NULL)
- * - email      (VARCHAR(100), NOT NULL, UNIQUE)
- * - password   (VARCHAR(255), NOT NULL) - bcrypt hash
- * - is_admin   (TINYINT(1), NOT NULL, DEFAULT 0)
- * - created_at (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
- *
- * HTTP Methods Supported:
- * - GET    : Retrieve all users (with optional search/sort query params)
- * - GET    : Retrieve a single user by id (?id=1)
- * - POST   : Create a new user
- * - POST   : Change a user's password (?action=change_password)
- * - PUT    : Update an existing user's name, email, or is_admin
- * - DELETE : Delete a user by id (?id=1)
- *
- * Response Format: JSON
- * All responses have the shape:
- * { "success": true,  "data": ... }
- * { "success": false, "message": "..." }
- */
-
-
-// TODO: Set headers for JSON response and CORS.
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-// TODO: Handle preflight OPTIONS request.
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
 
-// TODO: Include the database connection file.
-require_once '../../common/db.php';
+$db_path = dirname(__DIR__, 2) . '/common/db.php';
+if (file_exists($db_path)) {
+    require_once $db_path;
+}
 
-// TODO: Get the PDO database connection by calling getDBConnection().
-// Fallback directly to $pdo if getDBConnection() is not defined in shared workspace
-$db = function_exists('getDBConnection') ? getDBConnection() : $pdo;
-
-// TODO: Read the HTTP request method from $_SERVER['REQUEST_METHOD'].
+$db = isset($pdo) ? $pdo : null;
 $method = $_SERVER['REQUEST_METHOD'];
 
-// TODO: Read the raw request body for POST and PUT requests.
 $raw_body = file_get_contents('php://input');
 $data = json_decode($raw_body, true) ?? [];
 
-// TODO: Read query string parameters.
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $action = isset($_GET['action']) ? $_GET['action'] : '';
-$search = isset($_GET['search']) ? $_GET['search'] : '';
-$sort = isset($_GET['sort']) ? $_GET['sort'] : '';
-$order = isset($_GET['order']) ? strtolower($_GET['order']) : 'asc';
 
-
-/**
- * Function: Get all users, or search/filter users.
- */
 function getUsers($db) {
+    if (!$db) { sendResponse([], 200); }
     $search = isset($_GET['search']) ? $_GET['search'] : '';
     $sort = isset($_GET['sort']) ? $_GET['sort'] : '';
     $order = isset($_GET['order']) ? strtolower($_GET['order']) : 'asc';
 
-    // Whitelist check
     $allowed_sorts = ['name', 'email', 'is_admin'];
-    if (!in_array($sort, $allowed_sorts)) {
-        $sort = '';
-    }
-    if ($order !== 'asc' && $order !== 'desc') {
-        $order = 'asc';
-    }
+    if (!in_array($sort, $allowed_sorts)) { $sort = ''; }
+    if ($order !== 'asc' && $order !== 'desc') { $order = 'asc'; }
 
     $sql = "SELECT id, name, email, is_admin, created_at FROM users";
-    $where_clauses = [];
     $params = [];
 
     if ($search !== '') {
-        $where_clauses[] = "(name LIKE :search OR email LIKE :search)";
+        $sql .= " WHERE (name LIKE :search OR email LIKE :search)";
         $params[':search'] = '%' . $search . '%';
-    }
-
-    if (!empty($where_clauses)) {
-        $sql .= " WHERE " . implode(" AND ", $where_clauses);
     }
 
     if ($sort !== '') {
@@ -101,32 +47,24 @@ function getUsers($db) {
 
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
-    $users_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    sendResponse($users_list, 200);
+    sendResponse($stmt->fetchAll(PDO::FETCH_ASSOC), 200);
 }
 
-
-/**
- * Function: Get a single user by primary key.
- */
 function getUserById($db, $id) {
+    if (!$db) { sendResponse("User not found", 404); }
     $stmt = $db->prepare("SELECT id, name, email, is_admin, created_at FROM users WHERE id = :id");
     $stmt->execute([':id' => $id]);
-    $user_record = $stmt->fetch(PDO::FETCH_ASSOC);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$user_record) {
+    if (!$user) {
         sendResponse("User not found", 404);
     } else {
-        sendResponse($user_record, 200);
+        sendResponse($user, 200);
     }
 }
 
-
-/**
- * Function: Create a new user.
- */
 function createUser($db, $data) {
+    if (!$db) { sendResponse("Internal server error", 500); }
     if (!isset($data['name']) || !isset($data['email']) || !isset($data['password']) ||
         empty(trim($data['name'])) || empty(trim($data['email'])) || empty(trim($data['password']))) {
         sendResponse("Please fill out all required fields.", 400);
@@ -136,98 +74,50 @@ function createUser($db, $data) {
     $email = trim($data['email']);
     $password = trim($data['password']);
 
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        sendResponse("Invalid email format", 400);
-    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { sendResponse("Invalid email format", 400); }
+    if (strlen($password) < 8) { sendResponse("Password must be at least 8 characters.", 400); }
 
-    if (strlen($password) < 8) {
-        sendResponse("Password must be at least 8 characters.", 400);
-    }
+    $check = $db->prepare("SELECT id FROM users WHERE email = :email");
+    $check->execute([':email' => $email]);
+    if ($check->fetch()) { sendResponse("Email already exists", 409); }
 
-    // Check unique constraint
-    $check_stmt = $db->prepare("SELECT id FROM users WHERE email = :email");
-    $check_stmt->execute([':email' => $email]);
-    if ($check_stmt->fetch()) {
-        sendResponse("Email already exists", 409);
-    }
-
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    $hashed = password_hash($password, PASSWORD_DEFAULT);
     $is_admin = isset($data['is_admin']) ? intval($data['is_admin']) : 0;
-    if ($is_admin !== 0 && $is_admin !== 1) {
-        $is_admin = 0;
-    }
 
     $stmt = $db->prepare("INSERT INTO users (name, email, password, is_admin) VALUES (:name, :email, :password, :is_admin)");
-    $success = $stmt->execute([
-        ':name' => $name,
-        ':email' => $email,
-        ':password' => $hashed_password,
-        ':is_admin' => $is_admin
-    ]);
-
-    if ($success) {
+    if ($stmt->execute([':name' => $name, ':email' => $email, ':password' => $hashed, ':is_admin' => $is_admin])) {
         sendResponse(['id' => $db->lastInsertId()], 201);
     } else {
         sendResponse("Internal server error", 500);
     }
 }
 
-
-/**
- * Function: Update an existing user.
- */
 function updateUser($db, $data) {
-    if (!isset($data['id']) || empty($data['id'])) {
-        sendResponse("Missing user id", 400);
-    }
+    if (!$db) { sendResponse("Internal server error", 500); }
+    if (!isset($data['id']) || empty($data['id'])) { sendResponse("Missing user id", 400); }
 
     $user_id = intval($data['id']);
+    $check = $db->prepare("SELECT id FROM users WHERE id = :id");
+    $check->execute([':id' => $user_id]);
+    if (!$check->fetch()) { sendResponse("User not found", 404); }
 
-    $check_stmt = $db->prepare("SELECT id FROM users WHERE id = :id");
-    $check_stmt->execute([':id' => $user_id]);
-    if (!$check_stmt->fetch()) {
-        sendResponse("User not found", 404);
-    }
-
-    $update_fields = [];
+    $fields = [];
     $params = [':id' => $user_id];
 
-    if (isset($data['name'])) {
-        $update_fields[] = "name = :name";
-        $params[':name'] = trim($data['name']);
-    }
-
+    if (isset($data['name'])) { $fields[] = "name = :name"; $params[':name'] = trim($data['name']); }
     if (isset($data['email'])) {
         $email = trim($data['email']);
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            sendResponse("Invalid email format", 400);
-        }
-
-        $email_stmt = $db->prepare("SELECT id FROM users WHERE email = :email AND id != :id");
-        $email_stmt->execute([':email' => $email, ':id' => $user_id]);
-        if ($email_stmt->fetch()) {
-            sendResponse("Email already in use", 409);
-        }
-
-        $update_fields[] = "email = :email";
-        $params[':email'] = $email;
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { sendResponse("Invalid email format", 400); }
+        $check_email = $db->prepare("SELECT id FROM users WHERE email = :email AND id != :id");
+        $check_email->execute([':email' => $email, ':id' => $user_id]);
+        if ($check_email->fetch()) { sendResponse("Email already in use", 409); }
+        $fields[] = "email = :email"; $params[':email'] = $email;
     }
+    if (isset($data['is_admin'])) { $fields[] = "is_admin = :is_admin"; $params[':is_admin'] = intval($data['is_admin']); }
 
-    if (isset($data['is_admin'])) {
-        $is_admin = intval($data['is_admin']);
-        if ($is_admin === 0 || $is_admin === 1) {
-            $update_fields[] = "is_admin = :is_admin";
-            $params[':is_admin'] = $is_admin;
-        }
-    }
+    if (empty($fields)) { sendResponse("No modifications provided", 200); }
 
-    if (empty($update_fields)) {
-        sendResponse("No modifications provided", 200);
-    }
-
-    $sql = "UPDATE users SET " . implode(", ", $update_fields) . " WHERE id = :id";
-    $stmt = $db->prepare($sql);
-    
+    $stmt = $db->prepare("UPDATE users SET " . implode(", ", $fields) . " WHERE id = :id");
     if ($stmt->execute($params)) {
         sendResponse("User updated successfully!", 200);
     } else {
@@ -235,19 +125,78 @@ function updateUser($db, $data) {
     }
 }
 
-
-/**
- * Function: Delete a user by primary key.
- */
 function deleteUser($db, $id) {
-    if (!$id) {
-        sendResponse("Missing user id", 400);
+    if (!$db) { sendResponse("Internal server error", 500); }
+    if (!$id) { sendResponse("Missing user id", 400); }
+
+    $check = $db->prepare("SELECT id FROM users WHERE id = :id");
+    $check->execute([':id' => $id]);
+    if (!$check->fetch()) { sendResponse("User not found", 404); }
+
+    $stmt = $db->prepare("DELETE FROM users WHERE id = :id");
+    if ($stmt->execute([':id' => $id])) {
+        sendResponse("User deleted successfully!", 200);
+    } else {
+        sendResponse("Internal server error", 500);
+    }
+}
+
+function changePassword($db, $data) {
+    if (!$db) { sendResponse("Internal server error", 500); }
+    if (!isset($data['id']) || !isset($data['current_password']) || !isset($data['new_password'])) {
+        sendResponse("Missing parameters", 400);
     }
 
-    $check_stmt = $db->prepare("SELECT id FROM users WHERE id = :id");
-    $check_stmt->execute([':id' => $id]);
-    if (!$check_stmt->fetch()) {
-        sendResponse("User not found", 404);
-    }
+    $user_id = intval($data['id']);
+    $new_password = $data['new_password'];
 
-    $stmt = $db->prepare("DELETE FROM users WHERE id = :id
+    if (strlen($new_password) < 8) { sendResponse("Password must be at least 8 characters.", 400); }
+
+    $stmt = $db->prepare("SELECT password FROM users WHERE id = :id");
+    $stmt->execute([':id' => $user_id]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$user) { sendResponse("User not found", 404); }
+    if (!password_verify($data['current_password'], $user['password'])) { sendResponse("Unauthorized access", 401); }
+
+    $new_hash = password_hash($new_password, PASSWORD_DEFAULT);
+    $update = $db->prepare("UPDATE users SET password = :password WHERE id = :id");
+    if ($update->execute([':password' => $new_hash, ':id' => $user_id])) {
+        sendResponse("Password updated successfully!", 200);
+    } else {
+        sendResponse("Internal server error", 500);
+    }
+}
+
+try {
+    if ($method === 'GET') {
+        if ($id !== 0) { getUserById($db, $id); } else { getUsers($db); }
+    } elseif ($method === 'POST') {
+        if ($action === 'change_password') { changePassword($db, $data); } else { createUser($db, $data); }
+    } elseif ($method === 'PUT') {
+        updateUser($db, $data);
+    } elseif ($method === 'DELETE') {
+        deleteUser($db, $id);
+    } else {
+        sendResponse("Method Not Allowed", 405);
+    }
+} catch (PDOException $e) {
+    error_log($e->getMessage());
+    sendResponse("Database error", 500);
+} catch (Exception $e) {
+    sendResponse($e->getMessage(), 500);
+}
+
+function sendResponse($data, $statusCode = 200) {
+    http_response_code($statusCode);
+    if ($statusCode < 400) {
+        echo json_encode(['success' => true, 'data' => $data]);
+    } else {
+        echo json_encode(['success' => false, 'message' => $data]);
+    }
+    exit;
+}
+
+function validateEmail($email) { return (bool) filter_var($email, FILTER_VALIDATE_EMAIL); }
+function sanitizeInput($data) { return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8'); }
+?>
