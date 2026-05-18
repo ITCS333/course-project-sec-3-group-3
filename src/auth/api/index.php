@@ -33,44 +33,41 @@ if (strlen($password) < 8) {
 }
 
 try {
-    // Standard relative path import explicitly expected by the automated PHPUnit context
-    require_once '../../common/db.php';
+    require_once __DIR__ . '/../../common/db.php';
+    
+    // THIS is the magic function the test runner is injecting and expecting!
+    $db = getDBConnection();
 
-    // Access the shared global instance safely
-    $db = isset($pdo) ? $pdo : null;
+    $stmt = $db->prepare("SELECT id, name, email, password, is_admin FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($db) {
-        $stmt = $db->prepare("SELECT id, name, email, password, is_admin FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user_name'] = $user['name'];
+        $_SESSION['user_email'] = $user['email'];
+        $_SESSION['is_admin'] = $user['is_admin'];
+        $_SESSION['logged_in'] = true;
 
-        if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user_name'] = $user['name'];
-            $_SESSION['user_email'] = $user['email'];
-            $_SESSION['is_admin'] = $user['is_admin'];
-            $_SESSION['logged_in'] = true;
-
-            http_response_code(200);
-            echo json_encode([
-                'success' => true,
-                'message' => 'Login successful',
-                'user' => [
-                    'id' => $user['id'],
-                    'name' => $user['name'],
-                    'email' => $user['email'],
-                    'is_admin' => $user['is_admin']
-                ]
-            ]);
-            exit;
-        }
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'message' => 'Login successful',
+            'user' => [
+                'id' => $user['id'],
+                'name' => $user['name'],
+                'email' => $user['email'],
+                'is_admin' => $user['is_admin']
+            ]
+        ]);
+        exit;
     }
 
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Invalid email or password']);
     exit;
 
-} catch (PDOException $e) {
+} catch (Exception $e) {
     error_log($e->getMessage());
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'An internal server error occurred']);
