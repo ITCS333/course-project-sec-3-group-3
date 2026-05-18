@@ -16,12 +16,16 @@
 // the HTML document is parsed before this script runs.
 
 // TODO: Select the login form by its id "login-form".
+const loginForm = document.getElementById("login-form");
 
 // TODO: Select the email input element by its ID.
+const emailInput = document.getElementById("email");
 
 // TODO: Select the password input element by its ID.
+const passwordInput = document.getElementById("password");
 
 // TODO: Select the message container element by its ID.
+const messageContainer = document.getElementById("message-container");
 
 // --- Functions ---
 
@@ -37,7 +41,10 @@
  * (this will allow for CSS styling of 'success' and 'error' states).
  */
 function displayMessage(message, type) {
-  // ... your implementation here ...
+  if (messageContainer) {
+    messageContainer.textContent = message;
+    messageContainer.className = type;
+  }
 }
 
 /**
@@ -53,7 +60,8 @@ function displayMessage(message, type) {
  * A simple regex for this purpose is: /\S+@\S+\.\S+/
  */
 function isValidEmail(email) {
-  // ... your implementation here ...
+  const regex = /\S+@\S+\.\S+/;
+  return regex.test(email);
 }
 
 /**
@@ -67,7 +75,7 @@ function isValidEmail(email) {
  * 3. Return `false` if the password is not valid.
  */
 function isValidPassword(password) {
-  // ... your implementation here ...
+  return password.length >= 8;
 }
 
 /**
@@ -85,7 +93,49 @@ function isValidPassword(password) {
  * - (Optional) Clear the email and password input fields.
  */
 function handleLogin(event) {
-  // ... your implementation here ...
+  event.preventDefault();
+
+  const email = emailInput ? emailInput.value.trim() : "";
+  const password = passwordInput ? passwordInput.value : "";
+
+  if (!isValidEmail(email)) {
+    displayMessage("Invalid email format.", "error");
+    return;
+  }
+
+  if (!isValidPassword(password)) {
+    displayMessage("Password must be at least 8 characters.", "error");
+    return;
+  }
+
+  displayMessage("Login successful!", "success");
+
+  fetch("api/index.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email: email, password: password })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      if (emailInput) emailInput.value = "";
+      if (passwordInput) passwordInput.value = "";
+      setTimeout(() => {
+        if (data.user && data.user.is_admin) {
+          window.location.href = "../admin/manage_users.html";
+        } else {
+          window.location.href = "../../index.html";
+        }
+      }, 1000);
+    } else {
+      displayMessage(data.message || "Invalid email or password.", "error");
+    }
+  })
+  .catch(() => {
+    displayMessage("An error occurred. Please try again later.", "error");
+  });
 }
 
 /**
@@ -97,7 +147,9 @@ function handleLogin(event) {
  * 3. The event listener should call the `handleLogin` function.
  */
 function setupLoginForm() {
-  // ... your implementation here ...
+  if (loginForm) {
+    loginForm.addEventListener("submit", handleLogin);
+  }
 }
 
 // --- Initial Page Load ---
