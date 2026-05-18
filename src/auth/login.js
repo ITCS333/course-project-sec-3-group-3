@@ -16,11 +16,14 @@ function isValidEmail(email) {
 }
 
 function isValidPassword(password) {
-  return password && password.length >= 8;
+  if (!password) return false;
+  return password.length >= 8;
 }
 
 function handleLogin(event) {
-  if (event) event.preventDefault();
+  if (event && typeof event.preventDefault === 'function') {
+    event.preventDefault();
+  }
 
   const email = emailInput ? emailInput.value.trim() : "";
   const password = passwordInput ? passwordInput.value : "";
@@ -37,9 +40,6 @@ function handleLogin(event) {
 
   displayMessage("Login successful!", "success");
 
-  if (emailInput) emailInput.value = "";
-  if (passwordInput) passwordInput.value = "";
-
   if (typeof fetch !== 'undefined') {
     fetch("api/index.php", {
       method: "POST",
@@ -48,8 +48,8 @@ function handleLogin(event) {
     })
     .then(response => response.json())
     .then(data => {
-      if (data.success) {
-        if (data.user && data.user.is_admin) {
+      if (data.success && data.user) {
+        if (data.user.is_admin === 1 || data.user.is_admin === true) {
           window.location.href = "../admin/manage_users.html";
         } else {
           window.location.href = "../../index.html";
@@ -67,13 +67,3 @@ function setupLoginForm() {
 }
 
 setupLoginForm();
-
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-  module.exports = {
-    displayMessage,
-    isValidEmail,
-    isValidPassword,
-    handleLogin,
-    setupLoginForm
-  };
-}
