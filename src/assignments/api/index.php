@@ -564,9 +564,7 @@ try {
         // ?action=delete_comment&comment_id={id} → delete one comment
         // TODO: if $action === 'delete_comment', call deleteComment($db, $commentId)
         if($action==='delete_comment'){
-            $input=json_decode(file_get_contents("php://input"),true);
-            $commentId=$_GET['comment_id']??($input['comment_id']??null);
-            deleteComment($db,$commentId);
+            deleteComment($db,$_GET['comment_id']??null);
         }
         // ?id={id} → delete an assignment (and its comments via CASCADE)
         // TODO: else call deleteAssignment($db, $id)
