@@ -185,7 +185,7 @@ function getAssignmentById(PDO $db, $id): void
 {
     // TODO: Validate that $id is provided and numeric.
     // If not, call sendResponse with HTTP 400.
-    if(!$id||!is_numeric($id)){
+    if(!isset($id) || !is_numeric($id)){
         sendResponse(['success'=>false,'message'=>'Invalid assignment ID'],400);
         return;
     }
