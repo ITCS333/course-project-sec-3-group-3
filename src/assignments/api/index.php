@@ -503,11 +503,10 @@ function deleteComment(PDO $db, $commentId): void
     }
     // TODO: DELETE FROM comments_assignment WHERE id = ?
     $stmt=$db->prepare("DELETE FROM comments_assignment WHERE id=?");
-    $stmt->execute([(int)$commentId]);
-    $affected=$stmt->rowCount();
+    $ok=$stmt->execute([(int)$commentId]);
     // TODO: If rowCount() > 0, sendResponse HTTP 200.
     // Otherwise sendResponse HTTP 500.
-    if($affected>0){
+    if($ok){
         sendResponse(['success'=>true],200);
         return;
     }
