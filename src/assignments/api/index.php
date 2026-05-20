@@ -324,7 +324,7 @@ function updateAssignment(PDO $db, array $data): void
         $params[]=$due_date;
     }
     if(isset($data['files'])){
-        $files = json_encode($data['files']);
+        $files=is_array($data['files'])?json_encode(array_values($data['files'])):json_encode([]);
         $fields[]="files=?";
         $params[]=$files;
     }
@@ -554,9 +554,7 @@ try {
         }
     } elseif ($method === 'PUT') {// TODO: Validate that $assignmentId is provided and numeric.
     // If not, sendResponse HTTP 400.
-        if(empty($assignmentId)||!is_numeric($assignmentId)){
-            sendResponse(['success'=>false,'message'=>'Invalid assignment_id'],400);
-        }
+        
         // Update an assignment; id comes from the JSON body
         // TODO: call updateAssignment($db, $data)
         updateAssignment($db,$data);
