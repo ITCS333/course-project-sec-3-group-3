@@ -185,7 +185,7 @@ function getAssignmentById(PDO $db, $id): void
 {
     // TODO: Validate that $id is provided and numeric.
     // If not, call sendResponse with HTTP 400.
-    if(!$id||!is_numeric($id)){
+    if(!isset($id) || !is_numeric($id)){
         sendResponse(['success'=>false,'message'=>'Invalid assignment ID'],400);
         return;
     }
@@ -286,7 +286,7 @@ function updateAssignment(PDO $db, array $data): void
 {
     // TODO: Validate that $data['id'] is present.
     // If not, sendResponse HTTP 400.
-    if (!isset($data['id']) || empty($data['id'])){
+    if (!isset($data['id']) || !is_numeric($data['id'])){
         sendResponse(['success'=>false,'message'=>'Missing id'],400);
         return;
     }
