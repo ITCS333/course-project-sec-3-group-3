@@ -496,17 +496,18 @@ function deleteComment(PDO $db, $commentId): void
     // TODO: Check that the comment exists in comments_assignment.
     // If not, sendResponse HTTP 404.
     $stmt=$db->prepare("SELECT id FROM comments_assignment WHERE id=?");
-    $stmt->execute([$commentId]);
+    $stmt->execute([(int)$commentId]);
     if(!$stmt->fetch(PDO::FETCH_ASSOC)){
         sendResponse(['success'=>false,'message'=>'Comment not found'],404);
         return;
     }
     // TODO: DELETE FROM comments_assignment WHERE id = ?
     $stmt=$db->prepare("DELETE FROM comments_assignment WHERE id=?");
-    $ok=$stmt->execute([(int)$commentId]);
+    $stmt->execute([(int)$commentId]);
+    $affected=$stmt->rowCount();
     // TODO: If rowCount() > 0, sendResponse HTTP 200.
     // Otherwise sendResponse HTTP 500.
-    if($ok){
+    if($affected>0){
         sendResponse(['success'=>true],200);
         return;
     }
