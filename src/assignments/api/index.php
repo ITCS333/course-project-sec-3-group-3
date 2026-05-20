@@ -564,7 +564,9 @@ try {
         // ?action=delete_comment&comment_id={id} → delete one comment
         // TODO: if $action === 'delete_comment', call deleteComment($db, $commentId)
         if($action==='delete_comment'){
-            $commentId=$commentId??($data['comment_id']??null);
+            if($commentId===null&&isset($data['comment_id'])){
+                $commentId=$data['comment_id'];
+            }
             deleteComment($db,$commentId);
         }
         // ?id={id} → delete an assignment (and its comments via CASCADE)
@@ -580,12 +582,12 @@ try {
 } catch (PDOException $e) {
     // TODO: Log the error with error_log().
     // Return a generic HTTP 500 — do NOT expose $e->getMessage() to clients.
-    error_log($e);
+    error_log($e->getMessage());
     sendResponse(['success'=>false,'message'=>'Internal Server Error'],500);
 } catch (Exception $e) {
     // TODO: Log the error with error_log().
     // Return HTTP 500 using sendResponse().
-    error_log($e);
+    error_log($e->getMessage());
     sendResponse(['success'=>false,'message'=>'Internal Server Error'],500);
 }
 
