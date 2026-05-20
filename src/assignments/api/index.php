@@ -185,7 +185,7 @@ function getAssignmentById(PDO $db, $id): void
 {
     // TODO: Validate that $id is provided and numeric.
     // If not, call sendResponse with HTTP 400.
-    if(!isset($id) || !is_numeric($id)){
+    if($id === null || $id === '' || !is_numeric($id)){
         sendResponse(['success'=>false,'message'=>'Invalid assignment ID'],400);
         return;
     }
@@ -488,7 +488,7 @@ function deleteComment(PDO $db, $commentId): void
 {
     // TODO: Validate that $commentId is provided and numeric.
     // If not, sendResponse HTTP 400.
-    if(empty($commentId)||!is_numeric($commentId)){
+    if($commentId === null || $commentId === '' || !is_numeric($commentId)){
         sendResponse(['success'=>false,'message'=>'Invalid comment_id'],400);
         return;
     }
