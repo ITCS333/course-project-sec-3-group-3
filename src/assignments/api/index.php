@@ -564,8 +564,8 @@ try {
         // ?action=delete_comment&comment_id={id} → delete one comment
         // TODO: if $action === 'delete_comment', call deleteComment($db, $commentId)
         if($action==='delete_comment'){
-            if($commentId===null&&isset($data['comment_id'])){
-                $commentId=$data['comment_id'];
+            if($commentId===null){
+                $commentId=$data['comment_id']??$data['id']??$_GET['id']??null;
             }
             deleteComment($db,$commentId);
         }
