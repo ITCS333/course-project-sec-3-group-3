@@ -489,7 +489,7 @@ function deleteComment(PDO $db, $commentId): void
 {
     // TODO: Validate that $commentId is provided and numeric.
     // If not, sendResponse HTTP 400.
-    if($commentId===null||!ctype_digit((string)$commentId)){
+    if($commentId===null||filter_var($commentId,FILTER_VALIDATE_INT)===false){
         sendResponse(['success'=>false,'message'=>'Invalid comment_id'],400);
         return;
     }
@@ -564,7 +564,8 @@ try {
         // ?action=delete_comment&comment_id={id} → delete one comment
         // TODO: if $action === 'delete_comment', call deleteComment($db, $commentId)
         if($action==='delete_comment'){
-            $commentId=$_GET['comment_id']??null;
+            $input=json_decode(file_get_contents("php://input"),true);
+            $commentId=$_GET['comment_id']??($input['comment_id']??null);
             deleteComment($db,$commentId);
         }
         // ?id={id} → delete an assignment (and its comments via CASCADE)
