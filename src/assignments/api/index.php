@@ -286,14 +286,15 @@ function updateAssignment(PDO $db, array $data): void
 {
     // TODO: Validate that $data['id'] is present.
     // If not, sendResponse HTTP 400.
-    if (!isset($data['id']) || !is_numeric($data['id'])){
+    $id=filter_var($data['id']??null,FILTER_VALIDATE_INT);
+    if($id===false){
         sendResponse(['success'=>false,'message'=>'Missing id'],400);
         return;
     }
     // TODO: Check that an assignment with this id exists.
     // If not, sendResponse HTTP 404.
     $stmt=$db->prepare("SELECT id FROM assignments WHERE id=?");
-    $stmt->execute([$data['id']]);
+    $stmt->execute([$id]);
     if(!$stmt->fetch(PDO::FETCH_ASSOC)){
         sendResponse(['success'=>false,'message'=>'Assignment not found'],404);
         return;
@@ -337,9 +338,9 @@ function updateAssignment(PDO $db, array $data): void
 
     // TODO: Build: UPDATE assignments SET {clauses} WHERE id = ?
     // Prepare, bind all SET values, then bind id, and execute.
-    $sql="UPDATE assignments SET ".implode(',',$fields)." WHERE id=?";
+    $sql="UPDATE assignments SET ".implode(', ',$fields)." WHERE id=?";
     $stmt=$db->prepare($sql);
-    $params[]=$data['id'];
+    $params[]=$id;
     $result=$stmt->execute($params);
     // TODO: sendResponse HTTP 200 on success, HTTP 500 on failure.
     if($result){
