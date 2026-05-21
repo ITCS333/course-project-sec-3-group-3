@@ -1,1 +1,41 @@
 /* CSS Styles */
+
+header.container h1 {
+  margin: 8px 0 18px 0;
+}
+
+main.container {
+  padding: 18px;
+}
+
+#new-topic-form {
+  margin-bottom: 18px;
+}
+
+#topic-list-container.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.topic-card {
+  background: white;
+  border: 1px solid var(--surface-border, #e6e9ef);
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(2,6,23,0.04);
+}
+
+.topic-card h3 { margin: 0 0 8px 0; }
+.topic-card p { margin: 0 0 10px 0; color: #374151; }
+.topic-card footer { font-size: 0.85rem; color: #6b7280; margin-bottom: 8px; }
+
+.topic-actions { display:flex; gap:8px; }
+.topic-actions .edit-btn, .topic-actions .delete-btn {
+  font-size: 0.85rem;
+}
+
+@media (max-width: 560px) {
+  main.container { padding: 12px; }
+}

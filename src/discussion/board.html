@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discussion Board</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <link rel="stylesheet" href="../common/styles.css">
     <script src="board.js" defer></script>
 </head>
 <body>
-    <header>
+    <header class="container">
         <h1>General Discussion Board</h1>
     </header>
 
-    <main>
+    <main class="container">
         <section>
             <h2>Start a New Topic</h2>
             <form id="new-topic-form" action="#">
@@ -32,7 +33,7 @@
 
         <section>
             <h2>All Topics</h2>
-            <div id="topic-list-container"></div>
+            <div id="topic-list-container" class="grid"></div>
         </section>
     </main>
 </body>

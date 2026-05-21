@@ -66,6 +66,9 @@ function createTopicArticle(topic) {
   // ... your implementation here ...
   const article = document.createElement("article");
 
+  // make the article visually match the site's card style
+  article.className = "topic-card";
+
   const heading = document.createElement("h3");
   const link = document.createElement("a");
   link.href = `topic.html?id=${topic.id}`;
@@ -76,6 +79,7 @@ function createTopicArticle(topic) {
   footer.textContent = `Posted by: ${topic.author} on ${topic.created_at}`;
 
   const actions = document.createElement("div");
+  actions.className = "topic-actions";
   const editBtn = document.createElement("button");
   editBtn.className = "edit-btn";
   editBtn.dataset.id = String(topic.id);
@@ -90,6 +94,12 @@ function createTopicArticle(topic) {
   actions.appendChild(deleteBtn);
 
   article.appendChild(heading);
+  // show a short preview of the message
+  if (topic.message) {
+    const msg = document.createElement("p");
+    msg.textContent = topic.message.length > 200 ? topic.message.slice(0,200) + '…' : topic.message;
+    article.appendChild(msg);
+  }
   article.appendChild(footer);
   article.appendChild(actions);
 
