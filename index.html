@@ -1,1 +1,68 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>ITCS333 — Course Website</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+</head>
+<body>
+
+	<header class="container">
+		<nav id="site-nav" role="navigation">
+			<a href="#" class="brand">ITCS333</a>
+			<ul>
+				<li><a id="resources-link" href="src/resources/list.html">Resources</a></li>
+				<li><a id="weekly-link" href="src/weekly/list.html">Weekly</a></li>
+				<li><a id="assignments-link" href="src/assignments/list.html">Assignments</a></li>
+				<li><a id="discussion-link" href="src/discussion/board.html">Discussion</a></li>
+				<li><a id="admin-link" href="src/admin/manage_users.html">Admin</a></li>
+				<li><a id="login-link" href="src/auth/login.html">Log In</a></li>
+				<li><a id="logout-link" href="#" style="display:none;">Log Out</a></li>
+			</ul>
+		</nav>
+	</header>
+
+	<main id="main-content" class="container">
+		<article id="hero">
+			<h1>ITCS333 — Internet Software Development</h1>
+			<p>Welcome to the course website. Use the navigation above to access resources, weekly materials, assignments, and the discussion board. Sign in to access administrative features.</p>
+
+			<p>
+				<a class="contrast" href="src/auth/login.html" id="get-started">Get Started — Log In</a>
+			</p>
+		</article>
+
+		<section id="overview">
+			<h2>Course Sections</h2>
+			<div class="grid">
+				<article>
+					<h3>Resources</h3>
+					<p>Course readings, links and downloadable materials.</p>
+					<p><a href="src/resources/list.html">Browse resources</a></p>
+				</article>
+				<article>
+					<h3>Weekly</h3>
+					<p>Weekly topics and materials organized by week.</p>
+					<p><a href="src/weekly/list.html">See weekly breakdown</a></p>
+				</article>
+				<article>
+					<h3>Assignments</h3>
+					<p>Assignment briefs, submission links and deadlines.</p>
+					<p><a href="src/assignments/list.html">View assignments</a></p>
+				</article>
+				<article>
+					<h3>Discussion</h3>
+					<p>Post topics and reply to class discussions.</p>
+					<p><a href="src/discussion/board.html">Open discussion board</a></p>
+				</article>
+			</div>
+		</section>
+	</main>
+
+	<footer class="container">
+		<small>© University of Bahrain — ITCS333</small>
+	</footer>
+
+</body>
+</html>
