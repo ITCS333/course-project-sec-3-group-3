@@ -445,5 +445,3 @@ try {
         'message' => 'An unexpected error occurred.'
     ], 500);
 }
-    // TODO: return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8');
-}
