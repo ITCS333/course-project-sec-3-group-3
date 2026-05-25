@@ -25,7 +25,7 @@ The website covers five functional areas, each assigned to one team member.
 | 2 | Course Resources |202308877|yousifabuhassan321-debug|
 | 3 | Weekly Breakdown |202302681|bader-hussain|
 | 4 | Assignments |202200172|eagh2022|
-| 5 | Discussion Board |202002161|abdulla-mohamed|
+| 5 | Discussion Board |202002161|Abdullah-Shami|
 
 ---
 
